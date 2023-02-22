@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-host-meta-name
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: test-host-label
+  template:
+    metadata:
+      labels: 
+        name: test-host-label
+    spec:
+      nodeSelector:
+        debug: test-host
+      containers:
+      - name: test-host-container-name
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 5000
+        env:
+          - name: NGINX_PORT
+            value: 5000
+      hostNetwork: true
