@@ -1,0 +1,45 @@
+version: '3'
+networks:
+  kafka-networks:
+    driver: bridge
+services:
+  # 对应 docker 命令，启动成功：
+  # docker run -d -p 2181:2181 -e TZ="Asia/Shanghai" -v /data/kafka/zookeeper/data:/data --name zookeeper zookeeper
+  zookeeper:
+    image: zookeeper
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      TZ: "Asia/Shanghai"
+    volumes:
+      - /data/kafka/zookeeper-data:/data
+    networks:
+      - kafka-networks
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      # KAFKA_CREATE_TOPICS: "my-topic:1:1"
+      KAFKA_CFG: |
+        listeners=PLAINTEXT://:9092
+        advertised.listeners=PLAINTEXT://kafka:9092
+        authorizer.class.name=kafka.security.auth.SimpleAclAuthorizer
+        super.users=User:admin
+        plain.sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin";
+    volumes:
+      - /data/kafka/data:/var/lib/kafka/data  # 数据文件挂载
+    networks:
+      - kafka-networks
