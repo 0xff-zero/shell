@@ -1,0 +1,14 @@
+version: '3'
+services:
+  # 对应 docker 命令，启动成功：
+  # docker run -d -p 2181:2181 -e TZ="Asia/Shanghai" -v /data/kafka/zookeeper/data:/data --name zookeeper zookeeper
+  zookeeper:
+    image: zookeeper
+    container_name: zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      TZ: "Asia/Shanghai"
+
